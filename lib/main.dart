@@ -1,7 +1,31 @@
+import 'dart:io' show Platform;
+
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:window_size/window_size.dart';
 
 void main() {
+  setupWindow();
   runApp(const MyApp());
+}
+
+const double windowWidth = 400;
+const double windowHeight = 800;
+
+void setupWindow() {
+  if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
+    WidgetsFlutterBinding.ensureInitialized();
+    setWindowTitle('Provider Demo');
+    setWindowMinSize(const Size(windowWidth, windowHeight));
+    setWindowMaxSize(const Size(windowWidth, windowHeight));
+    getCurrentScreen().then((screen) {
+      setWindowFrame(Rect.fromCenter(
+        center: screen!.frame.center,
+        width: windowWidth,
+        height: windowHeight,
+      ));
+    });
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -11,96 +35,87 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      themeMode: darkMode ? ThemeMode.dark : ThemeMode.light,
       darkTheme: ThemeData(brightness: Brightness.dark),
       title: 'Truck Master Warranty',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.amber),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Truck Master Warranty'),
+      home: const Register(title: 'Truck Master Warranty'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
+class Register extends StatefulWidget {
+  const Register({super.key, required this.title});
 
   final String title;
-
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<Register> createState() => _RegisterState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-  String _displayString = "";
-  static const Widget verticalSpacer = SizedBox(height: 16);
+class _RegisterState extends State<Register> {
+  late final TextEditingController _email;
+  late final TextEditingController _password;
+  late final TextEditingController _confirmPassword;
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
+  @override
+  void initState() {
+    _email = TextEditingController();
+    _password = TextEditingController();
+    _confirmPassword = TextEditingController();
+    super.initState();
   }
 
-  void _resetCounter() {
-    setState(() {
-      _counter = 0;
-    });
+  @override
+  void dispose() {
+    _email.dispose();
+    _password.dispose();
+    _confirmPassword.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-
-    _displayString = _counter == 0 ? "None" : '$_counter';
-
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text('${widget.title} ${_displayString}'),
-        centerTitle: true,
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            verticalSpacer, // Vertical Spacer
-            Text(
-              _displayString,
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            verticalSpacer, // Vertical Spacer
-            TextButton.icon(
-              onPressed: _resetCounter,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Reset Counter'),
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
-    );
+    return SafeArea(
+        child: Scaffold(
+            appBar: AppBar(title: const Text('Register')),
+            body: Column(
+              children: [
+                TextField(
+                  controller: _email,
+                  decoration: const InputDecoration(hintText: 'Email'),
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  keyboardType: TextInputType.emailAddress,
+                ),
+                TextField(
+                  controller: _password,
+                  decoration: const InputDecoration(hintText: 'Password'),
+                  obscureText: true,
+                  autocorrect: false,
+                  enableSuggestions: false,
+                ),
+                TextField(
+                  controller: _confirmPassword,
+                  decoration:
+                      const InputDecoration(hintText: 'Confirm Password'),
+                  obscureText: true,
+                  autocorrect: false,
+                  enableSuggestions: false,
+                ),
+                TextButton(
+                  onPressed: () async {
+                    final email = _email.text;
+                    final password = _password.text;
+                    final confirmPassword = _confirmPassword.text;
+                    if (password == confirmPassword) {
+                      print(email);
+                    }
+                  },
+                  child: const Text('Register'),
+                ),
+              ],
+            )));
   }
 }
