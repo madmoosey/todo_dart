@@ -3,6 +3,9 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:window_size/window_size.dart';
+import 'package:dio/dio.dart';
+
+final dio = Dio();
 
 void main() {
   setupWindow();
@@ -41,29 +44,27 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.amber),
         useMaterial3: true,
       ),
-      home: const Register(title: 'Truck Master Warranty'),
+      home: const LoginView(title: 'Truck Master Warranty'),
     );
   }
 }
 
-class Register extends StatefulWidget {
-  const Register({super.key, required this.title});
+class LoginView extends StatefulWidget {
+  const LoginView({super.key, required this.title});
 
   final String title;
   @override
-  State<Register> createState() => _RegisterState();
+  State<LoginView> createState() => _LoginViewState();
 }
 
-class _RegisterState extends State<Register> {
+class _LoginViewState extends State<LoginView> {
   late final TextEditingController _email;
   late final TextEditingController _password;
-  late final TextEditingController _confirmPassword;
 
   @override
   void initState() {
     _email = TextEditingController();
     _password = TextEditingController();
-    _confirmPassword = TextEditingController();
     super.initState();
   }
 
@@ -71,7 +72,6 @@ class _RegisterState extends State<Register> {
   void dispose() {
     _email.dispose();
     _password.dispose();
-    _confirmPassword.dispose();
     super.dispose();
   }
 
@@ -79,7 +79,7 @@ class _RegisterState extends State<Register> {
   Widget build(BuildContext context) {
     return SafeArea(
         child: Scaffold(
-            appBar: AppBar(title: const Text('Register')),
+            appBar: AppBar(title: const Text('Log In')),
             body: Column(
               children: [
                 TextField(
@@ -96,24 +96,15 @@ class _RegisterState extends State<Register> {
                   autocorrect: false,
                   enableSuggestions: false,
                 ),
-                TextField(
-                  controller: _confirmPassword,
-                  decoration:
-                      const InputDecoration(hintText: 'Confirm Password'),
-                  obscureText: true,
-                  autocorrect: false,
-                  enableSuggestions: false,
-                ),
                 TextButton(
                   onPressed: () async {
                     final email = _email.text;
                     final password = _password.text;
-                    final confirmPassword = _confirmPassword.text;
-                    if (password == confirmPassword) {
-                      print(email);
-                    }
+                    final _ = await dio.post(
+                        'https://app.staging.truckmasterwarranty.com/api/token/',
+                        data: {'email': email, 'password': password});
                   },
-                  child: const Text('Register'),
+                  child: const Text('Log In'),
                 ),
               ],
             )));
